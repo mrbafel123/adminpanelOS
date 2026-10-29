@@ -1,0 +1,110 @@
+# Ячейка для разработки: ядро и worker из исходников с перезагрузкой, Postgres, S3.
+#   pnpm dev            — поднять (первый запуск ставит зависимости, 1–2 мин)
+#   pnpm dev:logs       — логи ядра и worker
+# Админка: http://localhost:3200/admin, health: http://localhost:3200/api/renote/health
+name: renote-dev
+
+x-node: &node
+  image: node:24.22.2-alpine
+  working_dir: /repo/core
+  env_file: .env
+  environment:
+    COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    NEXT_TELEMETRY_DISABLED: '1'
+    CI: 'true'
+    npm_config_store_dir: /pnpm-store
+  volumes:
+    - ../..:/repo
+    - root_node_modules:/repo/node_modules
+    - core_node_modules:/repo/core/node_modules
+    - core_next:/repo/core/.next
+    - pnpm_store:/pnpm-store
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cell
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?запусти deploy/dev/init-env.sh}
+      POSTGRES_DB: cell
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    mem_limit: 256m
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U cell -d cell']
+      interval: 3s
+      retries: 30
+
+  # S3-хранилище медиа и бэкапов. Официальных образов MinIO больше нет,
+  # для разработки — SeaweedFS; ядро работает только через S3 API.
+  s3:
+    image: chrislusf/seaweedfs:4.50
+    command: server -ip.bind=0.0.0.0 -dir=/data -s3 -s3.port=8333 -s3.config=/etc/seaweedfs/s3.json
+    volumes:
+      - s3data:/data
+      - ./s3.json:/etc/seaweedfs/s3.json:ro
+    ports:
+      - '8333:8333'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:9333/cluster/healthz >/dev/null']
+      interval: 3s
+      retries: 30
+
+  s3-init:
+    image: chrislusf/seaweedfs:4.50
+    # Идемпотентно: при повторном запуске бакет уже есть.
+    entrypoint:
+      - sh
+      - -c
+      - echo "s3.bucket.list" | weed shell -master=s3:9333 | grep -qw "$$S3_BUCKET" || echo "s3.bucket.create -name $$S3_BUCKET" | weed shell -master=s3:9333
+    env_file: .env
+    depends_on:
+      s3:
+        condition: service_healthy
+    restart: 'no'
+
+  core:
+    <<: *node
+    command: sh -c "corepack enable && pnpm install && pnpm dev"
+    environment:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+      NEXT_TELEMETRY_DISABLED: '1'
+      CI: 'true'
+      npm_config_store_dir: /pnpm-store
+      DATABASE_URL: postgres://cell:${POSTGRES_PASSWORD}@postgres:5432/cell
+      S3_ENDPOINT: http://s3:8333
+    ports:
+      - '3200:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      s3-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/api/renote/health >/dev/null']
+      interval: 5s
+      timeout: 60s
+      retries: 60
+      start_period: 120s
+
+  worker:
+    <<: *node
+    command: sh -c "corepack enable && pnpm worker:dev"
+    environment:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+      CI: 'true'
+      npm_config_store_dir: /pnpm-store
+      DATABASE_URL: postgres://cell:${POSTGRES_PASSWORD}@postgres:5432/cell
+      S3_ENDPOINT: http://s3:8333
+    mem_limit: 384m
+    depends_on:
+      core:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  s3data:
+  root_node_modules:
+  core_node_modules:
+  core_next:
+  pnpm_store:

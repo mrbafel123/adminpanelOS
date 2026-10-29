@@ -1,0 +1,23 @@
+{
+  "name": "adminpanelos",
+  "private": true,
+  "type": "module",
+  "description": "Платформа ячеек агентства: ядро, модули, стартер сайта, agent, CLI",
+  "scripts": {
+    "dev": "sh deploy/dev/init-env.sh && docker compose -f deploy/dev/compose.yml up -d",
+    "dev:down": "docker compose -f deploy/dev/compose.yml down",
+    "dev:logs": "docker compose -f deploy/dev/compose.yml logs -f core worker",
+    "typecheck": "pnpm -r --parallel typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.9.0",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=24.22.1"
+  }
+}

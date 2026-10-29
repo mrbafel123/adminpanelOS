@@ -15,3 +15,10 @@ coverage/
 
 # Код проверки живёт только в ветке spike/payload
 spikes/
+
+# Локальная ячейка разработки: секреты из init-env.sh
+deploy/dev/s3.json
+
+# Генерируемые файлы TypeScript и Next
+*.tsbuildinfo
+next-env.d.ts

@@ -1,0 +1,12 @@
+packages:
+  - core
+  - modules/*
+  - packages/*
+  - starters/*
+  - agent
+  - cli
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - unrs-resolver

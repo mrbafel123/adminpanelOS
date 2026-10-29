@@ -1,0 +1,48 @@
+{
+  "name": "@renote/core",
+  "version": "0.1.0",
+  "description": "Ядро ячейки: API и админка на Payload 4 (ADR-012)",
+  "type": "module",
+  "scripts": {
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" payload build",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "worker": "cross-env NODE_OPTIONS=--no-deprecation CELL_ROLE=worker tsx src/worker.ts",
+    "worker:dev": "cross-env NODE_OPTIONS=--no-deprecation CELL_ROLE=worker tsx watch --clear-screen=false src/worker.ts",
+    "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "migrate:create": "cross-env NODE_OPTIONS=--no-deprecation payload migrate:create",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "4.0.0-beta.5",
+    "@payloadcms/next": "4.0.0-beta.5",
+    "@payloadcms/richtext-lexical": "4.0.0-beta.5",
+    "@payloadcms/storage-s3": "4.0.0-beta.5",
+    "@payloadcms/transformer-sharp": "4.0.0-beta.5",
+    "@payloadcms/translations": "4.0.0-beta.5",
+    "@payloadcms/ui": "4.0.0-beta.5",
+    "croner": "10.0.1",
+    "cross-env": "10.1.0",
+    "dotenv": "16.4.7",
+    "graphql": "^16.8.1",
+    "next": "16.4.2",
+    "payload": "4.0.0-beta.5",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.12.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "16.4.2",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "vite-tsconfig-paths": "6.0.5",
+    "vitest": "5.0.1"
+  }
+}
