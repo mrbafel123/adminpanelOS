@@ -48,16 +48,17 @@
 |---|---|---|
 | [ADR-001](ADR-001-system-composition.md) | Состав системы: Платформа в renoteOS, ячейки в adminpanelOS, владение данными | утверждено |
 | [ADR-002](ADR-002-fault-isolation.md) | Изоляция отказов, процессы ячейки, матрица деградации | утверждено |
-| [ADR-003](ADR-003-module-contract.md) | Модульный контракт: манифест, жизненный цикл, точки расширения | утверждено |
+| [ADR-003](ADR-003-module-contract.md) | Модульный контракт: манифест, жизненный цикл, точки расширения | утверждено, миграции и жизненный цикл — см. ADR-013 |
 | [ADR-004](ADR-004-access-layer.md) | Доступы: токены, SFTPGo, SSH через bastion и сертификаты, хранилище секретов | утверждено |
 | [ADR-005](ADR-005-servers-and-connection-levels.md) | Серверы, уровни подключения L0–L3, цели выкладки, SSR или статика | утверждено |
-| [ADR-006](ADR-006-deployment-and-updates.md) | Развёртывание: образы, bootstrap, agent-reconciler, раскатки, бэкапы | утверждено |
+| [ADR-006](ADR-006-deployment-and-updates.md) | Развёртывание: образы, bootstrap, agent-reconciler, раскатки, бэкапы | утверждено, версии модулей — см. ADR-013 |
 | [ADR-007](ADR-007-wordpress-strategy.md) | WordPress: управление через wp-cli, затем миграция без потери SEO | утверждено |
 | [ADR-008](ADR-008-licensing-marketplace-billing.md) | Офлайн-лицензии, маркет, оплата счётом и онлайн | утверждено |
 | [ADR-009](ADR-009-handover-and-code-protection.md) | Передача проекта и четыре слоя защиты кода | утверждено |
 | [ADR-010](ADR-010-core-selection.md) | Выбор основы ядра: Payload и критерии недельной проверки | утверждено, проверка пройдена ([отчёт](../spike-payload-report.md)) |
 | [ADR-011](ADR-011-legacy-code.md) | Что берём из старого AdminpanelOS | утверждено |
 | [ADR-012](ADR-012-core-payload-4.md) | Ядро ячейки на Payload 4 по итогам проверки | утверждено |
+| [ADR-013](ADR-013-module-catalog-in-core-image.md) | Каталог модулей в образе ядра: установка — это включение | утверждено, частично заменяет ADR-003 и ADR-006 |
 
 ## Дорожная карта
 
