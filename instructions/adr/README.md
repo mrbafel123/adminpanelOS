@@ -57,7 +57,7 @@
 | [ADR-009](ADR-009-handover-and-code-protection.md) | Передача проекта и четыре слоя защиты кода | утверждено |
 | [ADR-010](ADR-010-core-selection.md) | Выбор основы ядра: Payload и критерии недельной проверки | утверждено, проверка пройдена ([отчёт](../spike-payload-report.md)) |
 | [ADR-011](ADR-011-legacy-code.md) | Что берём из старого AdminpanelOS | утверждено |
-| [ADR-012](ADR-012-core-payload-4.md) | Ядро ячейки на Payload 4 по итогам проверки | предложено |
+| [ADR-012](ADR-012-core-payload-4.md) | Ядро ячейки на Payload 4 по итогам проверки | утверждено |
 
 ## Дорожная карта
 
