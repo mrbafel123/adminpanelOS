@@ -12,3 +12,6 @@ coverage/
 !.env.example
 *.pem
 *.key
+
+# Код проверки живёт только в ветке spike/payload
+spikes/
