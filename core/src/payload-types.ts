@@ -62,30 +62,34 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_10B15C6A".
+ * via the `definition` "LexicalNodes_82552699".
  */
-export type LexicalNodes_10B15C6A =
+export type LexicalNodes_82552699 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_10B15C6A>
+  | SerializedParagraphNode<LexicalNodes_82552699>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_10B15C6A>
+  | SerializedQuoteNode<LexicalNodes_82552699>
   | SerializedRelationshipNode<
       | 'pages'
       | 'folders'
       | 'users'
+      | 'forms'
+      | 'forms-submissions'
+      | 'cell-modules'
       | 'payload-kv'
+      | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_10B15C6A, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_10B15C6A, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_10B15C6A>
-  | SerializedListItemNode<LexicalNodes_10B15C6A>
-  | SerializedHeadingNode<LexicalNodes_10B15C6A>;
+  | SerializedAutoLinkNode<LexicalNodes_82552699, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_82552699, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_82552699>
+  | SerializedListItemNode<LexicalNodes_82552699>
+  | SerializedHeadingNode<LexicalNodes_82552699>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -109,7 +113,11 @@ export interface Config {
     media: Media;
     folders: Folder;
     users: User;
+    forms: Form;
+    'forms-submissions': FormsSubmission;
+    'cell-modules': CellModule;
     'payload-kv': PayloadKv;
+    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -121,7 +129,11 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    forms: FormsSelect<false> | FormsSelect<true>;
+    'forms-submissions': FormsSubmissionsSelect<false> | FormsSubmissionsSelect<true>;
+    'cell-modules': CellModulesSelect<false> | CellModulesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -134,10 +146,14 @@ export interface Config {
   globals: {
     'site-settings': SiteSetting;
     'cell-runtime': CellRuntime;
+    'forms-settings': FormsSetting;
+    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'cell-runtime': CellRuntimeSelect<false> | CellRuntimeSelect<true>;
+    'forms-settings': FormsSettingsSelect<false> | FormsSettingsSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'ru' | 'en';
   widgets: {
@@ -149,7 +165,14 @@ export interface Config {
   };
   user: User;
   jobs: {
-    tasks: unknown;
+    tasks: {
+      'renote-event-dispatch': TaskRenoteEventDispatch;
+      'renote-event-deliver': TaskRenoteEventDeliver;
+      inline: {
+        input: unknown;
+        output: unknown;
+      };
+    };
     workflows: unknown;
   };
 }
@@ -179,7 +202,7 @@ export interface Page {
   id: number;
   title: string;
   parent?: (number | null) | Page;
-  layout?: (Hero | Content | Faq)[] | null;
+  layout?: (Hero | Content | Faq | FormsForm)[] | null;
   slug?: string | null;
   createdBy?: {
     relationTo: 'users';
@@ -344,7 +367,7 @@ export interface User {
  * via the `definition` "Content".
  */
 export interface Content {
-  body?: LexicalRichText<LexicalNodes_10B15C6A> | null;
+  body?: LexicalRichText<LexicalNodes_82552699> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -367,6 +390,95 @@ export interface Faq {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormsForm".
+ */
+export interface FormsForm {
+  form: number | Form;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'forms-form';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms".
+ */
+export interface Form {
+  id: number;
+  title: string;
+  fields?:
+    | {
+        name: string;
+        label: string;
+        type: 'text' | 'email' | 'phone' | 'textarea' | 'checkbox';
+        required?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  successMessage?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms-submissions".
+ */
+export interface FormsSubmission {
+  id: number;
+  form: number | Form;
+  data?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  status?: ('new' | 'progress' | 'done') | null;
+  ip?: string | null;
+  notifiedAt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cell-modules".
+ */
+export interface CellModule {
+  id: number;
+  moduleId: string;
+  installed?: boolean | null;
+  installedAt?: string | null;
+  uninstalledAt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -381,6 +493,116 @@ export interface PayloadKv {
     | number
     | boolean
     | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs".
+ */
+export interface PayloadJob {
+  id: number;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  taskStatus?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'renote-event-dispatch' | 'renote-event-deliver';
+        taskID: string;
+        input:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        parent?: {
+          taskSlug?: ('inline' | 'renote-event-dispatch' | 'renote-event-deliver') | null;
+          taskID?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'renote-event-dispatch' | 'renote-event-deliver') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -404,6 +626,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'forms';
+        value: number | Form;
+      } | null)
+    | ({
+        relationTo: 'forms-submissions';
+        value: number | FormsSubmission;
+      } | null)
+    | ({
+        relationTo: 'cell-modules';
+        value: number | CellModule;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -511,6 +745,13 @@ export interface PagesSelect<T extends boolean = true> {
                     answer?: T;
                     id?: T;
                   };
+              id?: T;
+              blockName?: T;
+            };
+        'forms-form'?:
+          | T
+          | {
+              form?: T;
               id?: T;
               blockName?: T;
             };
@@ -641,11 +882,101 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms_select".
+ */
+export interface FormsSelect<T extends boolean = true> {
+  title?: T;
+  fields?:
+    | T
+    | {
+        name?: T;
+        label?: T;
+        type?: T;
+        required?: T;
+        id?: T;
+      };
+  successMessage?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms-submissions_select".
+ */
+export interface FormsSubmissionsSelect<T extends boolean = true> {
+  form?: T;
+  data?: T;
+  status?: T;
+  ip?: T;
+  notifiedAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cell-modules_select".
+ */
+export interface CellModulesSelect<T extends boolean = true> {
+  moduleId?: T;
+  installed?: T;
+  installedAt?: T;
+  uninstalledAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_select".
+ */
+export interface PayloadJobsSelect<T extends boolean = true> {
+  input?: T;
+  taskStatus?: T;
+  meta?: T;
+  completedAt?: T;
+  totalTried?: T;
+  hasError?: T;
+  error?: T;
+  log?:
+    | T
+    | {
+        executedAt?: T;
+        completedAt?: T;
+        taskSlug?: T;
+        taskID?: T;
+        input?: T;
+        output?: T;
+        state?: T;
+        error?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
+        id?: T;
+      };
+  taskSlug?: T;
+  queue?: T;
+  waitUntil?: T;
+  processingUntil?: T;
+  processingToken?: T;
+  concurrencyKey?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -753,6 +1084,43 @@ export interface CellRuntime {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms-settings".
+ */
+export interface FormsSetting {
+  id: number;
+  notifyEmail: string;
+  storeIp?: boolean | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: number;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
@@ -801,6 +1169,29 @@ export interface CellRuntimeSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms-settings_select".
+ */
+export interface FormsSettingsSelect<T extends boolean = true> {
+  notifyEmail?: T;
+  storeIp?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "welcome_widget".
  */
 export interface WelcomeWidget {
@@ -826,7 +1217,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'pages' | 'media' | 'folders' | 'users';
+    relatedCollection: 'pages' | 'media' | 'folders' | 'users' | 'forms' | 'forms-submissions';
     where?:
       | {
           [k: string]: unknown;
@@ -848,7 +1239,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('pages' | 'media' | 'folders' | 'users')[] | null;
+    excludedCollections?: ('pages' | 'media' | 'folders' | 'users' | 'forms' | 'forms-submissions')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
@@ -861,6 +1252,47 @@ export interface UploadDropzoneWidget {
     excludedCollections?: 'media'[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskRenote-event-dispatch".
+ */
+export interface TaskRenoteEventDispatch {
+  input: {
+    event: string;
+    source: string;
+    data?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskRenote-event-deliver".
+ */
+export interface TaskRenoteEventDeliver {
+  input: {
+    event: string;
+    source: string;
+    data?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    consumer: string;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "required": ["notifyEmail"],
+  "properties": {
+    "notifyEmail": { "type": "string", "format": "email", "title": "Куда присылать заявки" },
+    "storeIp": { "type": "boolean", "title": "Сохранять IP отправителя", "default": false }
+  }
+}

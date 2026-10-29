@@ -1,0 +1,18 @@
+id: forms
+name: Формы
+version: 1.0.0
+core: '>=0.1 <1.0'
+runtime: inprocess
+permissions:
+  - mail.send
+  - events.publish:forms.*
+settings: settings.schema.json
+admin:
+  menu: { title: Формы, icon: inbox }
+site:
+  blocks: [form]
+events:
+  emits: [forms.submitted.v1]
+  consumes: [forms.submitted.v1]
+license: { model: subscription, sku: forms-pro }
+degradation: Заявки принимаются всегда, уведомления копятся в очереди и уходят, когда worker снова доступен

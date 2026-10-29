@@ -11,6 +11,16 @@ export const Users: CollectionConfig = {
   },
   auth: true,
   versions: false,
+  hooks: {
+    // Первый пользователь ячейки — её владелец, иначе управлять ячейкой будет некому.
+    beforeChange: [
+      async ({ req, operation, data }) => {
+        if (operation !== 'create') return data
+        const { totalDocs } = await req.payload.count({ collection: 'users', overrideAccess: true, req })
+        return totalDocs === 0 ? { ...data, role: 'owner' } : data
+      },
+    ],
+  },
   access: {
     // Себя видит каждый, остальных — только владелец.
     read: ({ req }) => (req.user?.role === 'owner' ? true : { id: { equals: req.user?.id } }),

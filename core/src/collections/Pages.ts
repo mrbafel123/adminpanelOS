@@ -17,7 +17,13 @@ export const Pages: CollectionConfig = {
   },
   fields: [
     { name: 'title', type: 'text', required: true, localized: true, label: 'Заголовок' },
-    { name: 'parent', type: 'relationship', relationTo: 'pages', label: 'Родитель', admin: { position: 'sidebar' } },
+    {
+      name: 'parent',
+      type: 'relationship',
+      relationTo: 'pages',
+      label: 'Родитель',
+      admin: { position: 'sidebar' },
+    },
     {
       name: 'layout',
       type: 'blocks',

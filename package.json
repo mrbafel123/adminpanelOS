@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Платформа ячеек агентства: ядро, модули, стартер сайта, agent, CLI",
   "scripts": {
-    "dev": "sh deploy/dev/init-env.sh && docker compose -f deploy/dev/compose.yml up -d",
+    "dev": "sh deploy/dev/init-env.sh && node deploy/dev/dev-licenses.mjs && docker compose -f deploy/dev/compose.yml up -d",
     "dev:down": "docker compose -f deploy/dev/compose.yml down",
     "dev:logs": "docker compose -f deploy/dev/compose.yml logs -f core worker",
     "typecheck": "pnpm -r --parallel typecheck",

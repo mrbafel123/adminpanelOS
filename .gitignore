@@ -22,3 +22,7 @@ deploy/dev/s3.json
 # Генерируемые файлы TypeScript и Next
 *.tsbuildinfo
 next-env.d.ts
+
+# Каталог модулей генерируется при сборке (ADR-013)
+core/src/modules/catalog.generated.ts
+deploy/dev/licenses/

@@ -14,6 +14,8 @@ S3_BUCKET=media
 S3_ACCESS_KEY_ID=$S3_KEY
 S3_SECRET_ACCESS_KEY=$S3_SECRET
 SITE_ORIGINS=http://localhost:3220
+DEV_OWNER_EMAIL=owner@dev.local
+DEV_OWNER_PASSWORD=$(rand 12)
 ENV
 cat > s3.json <<JSON
 { "identities": [{ "name": "cell", "credentials": [{ "accessKey": "$S3_KEY", "secretKey": "$S3_SECRET" }], "actions": ["Admin", "Read", "Write", "List", "Tagging"] }] }

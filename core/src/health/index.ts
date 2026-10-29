@@ -1,5 +1,7 @@
 import type { Endpoint, Payload } from 'payload'
 
+import { registry } from '../modules/registry'
+
 // Worker пишет пульс раз в 15 с. Три пропуска подряд — считаем, что он не работает.
 export const WORKER_HEARTBEAT_MS = 15_000
 const WORKER_STALE_MS = WORKER_HEARTBEAT_MS * 3
@@ -32,6 +34,15 @@ export const checkHealth = async (payload: Payload, now = Date.now()): Promise<C
             ? `worker не отвечает ${Math.round((now - seenAt) / 1000)} с, задачи копятся в очереди`
             : 'worker ещё ни разу не запускался',
         }
+
+  // Установленный модуль, который упал или деградировал, — повод для degraded с причиной.
+  for (const entry of registry.values()) {
+    if (!entry.installed || entry.status === 'active') continue
+    checks[`module:${entry.manifest.id}`] = {
+      ok: false,
+      detail: `${entry.status}: ${entry.reason ?? ''}`.trim(),
+    }
+  }
 
   return { status: Object.values(checks).every((c) => c.ok) ? 'ready' : 'degraded', checks }
 }

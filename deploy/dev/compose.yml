@@ -19,6 +19,7 @@ x-node: &node
     - core_node_modules:/repo/core/node_modules
     - core_next:/repo/core/.next
     - pnpm_store:/pnpm-store
+    - ./licenses:/licenses:ro
 
 services:
   postgres:
@@ -65,7 +66,8 @@ services:
 
   core:
     <<: *node
-    command: sh -c "corepack enable && pnpm install && pnpm dev"
+    # В dev lockfile обновляется при добавлении пакетов; в CI — только --frozen-lockfile.
+    command: sh -c "corepack enable && pnpm install --no-frozen-lockfile && pnpm dev"
     environment:
       COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
       NEXT_TELEMETRY_DISABLED: '1'
@@ -73,6 +75,7 @@ services:
       npm_config_store_dir: /pnpm-store
       DATABASE_URL: postgres://cell:${POSTGRES_PASSWORD}@postgres:5432/cell
       S3_ENDPOINT: http://s3:8333
+      LICENSE_DIR: /licenses
     ports:
       - '3200:3000'
     depends_on:
@@ -96,6 +99,7 @@ services:
       npm_config_store_dir: /pnpm-store
       DATABASE_URL: postgres://cell:${POSTGRES_PASSWORD}@postgres:5432/cell
       S3_ENDPOINT: http://s3:8333
+      LICENSE_DIR: /licenses
     mem_limit: 384m
     depends_on:
       core:

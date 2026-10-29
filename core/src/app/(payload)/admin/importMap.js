@@ -24,11 +24,14 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { LLMInstructionsMenuItem as LLMInstructionsMenuItem_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { NullField as NullField_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { HierarchyButton as HierarchyButton_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { LicenseGate as LicenseGate_0cbb7019d5de2ce71cbef23502e0eb38 } from '../../../modules/admin/LicenseGate'
 import { LLMInstructionsDescription as LLMInstructionsDescription_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { FixedToolbarFeatureClient as FixedToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { LLMInstructionsCell as LLMInstructionsCell_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { NavLinks as NavLinks_3fce88a6ab9b27536c53bad72a6c62cc } from '../../../modules/admin/NavLinks'
 import { FolderIcon as FolderIcon_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { HierarchySidebarTabServer as HierarchySidebarTabServer_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
+import { ModulesView as ModulesView_16f4a591003070f0216a3c6c6715c233 } from '../../../modules/admin/ModulesView'
 import { WelcomeWidget as WelcomeWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
 import { CollectionQueryWidget as CollectionQueryWidget_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
@@ -67,11 +70,14 @@ export const importMap = {
   "@payloadcms/ui#LLMInstructionsMenuItem": LLMInstructionsMenuItem_3817bf644402e67bfe6577f60ef982de,
   "@payloadcms/ui#NullField": NullField_3817bf644402e67bfe6577f60ef982de,
   "@payloadcms/ui/rsc#HierarchyButton": HierarchyButton_ab83ff7e88da8d3530831f296ec4756a,
+  "/modules/admin/LicenseGate#LicenseGate": LicenseGate_0cbb7019d5de2ce71cbef23502e0eb38,
   "@payloadcms/ui#LLMInstructionsDescription": LLMInstructionsDescription_3817bf644402e67bfe6577f60ef982de,
   "@payloadcms/richtext-lexical/client#FixedToolbarFeatureClient": FixedToolbarFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/ui/rsc#LLMInstructionsCell": LLMInstructionsCell_ab83ff7e88da8d3530831f296ec4756a,
+  "/modules/admin/NavLinks#NavLinks": NavLinks_3fce88a6ab9b27536c53bad72a6c62cc,
   "@payloadcms/ui#FolderIcon": FolderIcon_3817bf644402e67bfe6577f60ef982de,
   "@payloadcms/ui/rsc#HierarchySidebarTabServer": HierarchySidebarTabServer_ab83ff7e88da8d3530831f296ec4756a,
+  "/modules/admin/ModulesView#ModulesView": ModulesView_16f4a591003070f0216a3c6c6715c233,
   "@payloadcms/ui/rsc#WelcomeWidget": WelcomeWidget_ab83ff7e88da8d3530831f296ec4756a,
   "@payloadcms/ui/rsc#CollectionCards": CollectionCards_ab83ff7e88da8d3530831f296ec4756a,
   "@payloadcms/ui/rsc#CollectionQueryWidget": CollectionQueryWidget_ab83ff7e88da8d3530831f296ec4756a,

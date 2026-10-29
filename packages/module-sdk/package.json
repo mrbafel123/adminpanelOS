@@ -1,0 +1,26 @@
+{
+  "name": "@renote/module-sdk",
+  "version": "0.1.0",
+  "description": "SDK модулей ячейки: манифест, вклады, runtime (ADR-003, ADR-013)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "semver": "^7.8.0"
+  },
+  "peerDependencies": {
+    "payload": "4.0.0-beta.5"
+  },
+  "devDependencies": {
+    "@types/semver": "^7.8.0",
+    "payload": "4.0.0-beta.5",
+    "typescript": "6.0.3",
+    "vitest": "5.0.1"
+  }
+}

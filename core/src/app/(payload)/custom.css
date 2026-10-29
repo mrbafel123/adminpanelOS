@@ -1,0 +1,51 @@
+/* Брендинг агентства и компоненты ячейки. Токены — из дизайн-системы Payload 4. */
+:root {
+  --renote-brand: #4f46e5;
+  --color-bg-brand: var(--renote-brand);
+  --color-border-brand: var(--renote-brand);
+}
+
+.renote-logo { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 600; }
+.renote-logo__mark {
+  display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 10px;
+  background: var(--renote-brand); color: #fff; font-weight: 700;
+}
+.renote-logo__mark--small { width: 24px; height: 24px; border-radius: 6px; font-size: 13px; }
+
+.renote-page { padding: 24px var(--gutter-h, 40px); }
+.renote-muted { opacity: 0.65; font-size: 13px; }
+.renote-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+.renote-table th, .renote-table td {
+  text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-border-component, #ddd);
+  vertical-align: top;
+}
+.renote-status { font-weight: 600; }
+.renote-status--active { color: var(--color-text-success, #15803d); }
+.renote-status--degraded { color: var(--color-text-warning, #b45309); }
+.renote-status--failed, .renote-status--disabled { color: var(--color-text-danger, #b91c1c); }
+.renote-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 16px; }
+.renote-card { border: 1px solid var(--color-border-component, #ddd); border-radius: 10px; padding: 16px; }
+
+.renote-banner { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+.renote-banner--warning { background: var(--color-bg-warning-tertiary, #fef3c7); }
+.renote-banner--danger { background: var(--color-bg-danger-tertiary, #fee2e2); }
+.renote-link { background: none; border: 0; padding: 0; color: inherit; text-decoration: underline; cursor: pointer; }
+
+.renote-modal {
+  position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center;
+  background: rgb(0 0 0 / 0.45);
+}
+.renote-modal__card {
+  max-width: 460px; margin: 16px; padding: 24px; border-radius: 12px;
+  background: var(--color-bg-elevated, #fff); box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
+}
+.renote-modal__card h2 { margin: 0 0 12px; }
+.renote-modal__actions { display: flex; gap: 8px; margin-top: 20px; }
+.renote-button {
+  padding: 8px 16px; border-radius: 6px; border: 1px solid var(--color-border-control, #ccc);
+  background: transparent; color: inherit; cursor: pointer; text-decoration: none; font: inherit;
+}
+.renote-button--primary { background: var(--renote-brand); border-color: var(--renote-brand); color: #fff; }
+.renote-title { font-size: 32px; font-weight: 600; margin: 8px 0 24px; }
+.renote-actions { display: grid; gap: 6px; }
+.renote-error { color: var(--color-text-danger, #b91c1c); font-size: 13px; }

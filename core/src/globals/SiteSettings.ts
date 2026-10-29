@@ -25,7 +25,12 @@ export const SiteSettings: GlobalConfig = {
       type: 'array',
       label: 'Соцсети',
       fields: [
-        { name: 'network', type: 'select', label: 'Сеть', options: ['telegram', 'vk', 'whatsapp', 'youtube'] },
+        {
+          name: 'network',
+          type: 'select',
+          label: 'Сеть',
+          options: ['telegram', 'vk', 'whatsapp', 'youtube'],
+        },
         { name: 'url', type: 'text', label: 'Ссылка' },
       ],
     },
