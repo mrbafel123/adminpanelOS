@@ -34,10 +34,18 @@ export const callEndpoint = async (
   return { status: res.status, body: json as any }
 }
 
-// Раздача и доставка события — две задачи: два прохода очереди, как два тика worker.
+// Очередь до пустоты, как несколько тиков worker: задачи порождают новые
+// (раздача события → доставка → обновление сайта).
 export const runQueue = async (payload: Payload) => {
-  await payload.jobs.run({ allQueues: true, overrideAccess: true })
-  await payload.jobs.run({ allQueues: true, overrideAccess: true })
+  for (let tick = 0; tick < 10; tick++) {
+    const { totalDocs } = await payload.count({
+      collection: 'payload-jobs',
+      where: { completedAt: { exists: false }, hasError: { not_equals: true } },
+      overrideAccess: true,
+    })
+    if (!totalDocs) return
+    await payload.jobs.run({ allQueues: true, overrideAccess: true, limit: 100 })
+  }
 }
 
 // Каждый файл тестов начинает с пустой базы. Иначе push схемы при другом наборе модулей

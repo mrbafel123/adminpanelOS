@@ -1,0 +1,27 @@
+{
+  "name": "@renote/site-sdk",
+  "version": "0.1.0",
+  "description": "SDK сайта клиента: данные ядра ячейки, кеш, обновление после публикации (ADR-005)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./content": "./src/content-types.generated.ts",
+    "./rich-text": "./src/rich-text.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@renote/module-sdk": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "react": "19.3.1",
+    "typescript": "6.0.3",
+    "vitest": "5.0.1"
+  }
+}

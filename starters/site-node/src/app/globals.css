@@ -1,0 +1,44 @@
+:root {
+  --bg: #ffffff;
+  --text: #16161d;
+  --muted: #6b6b78;
+  --line: #e6e6ec;
+  --accent: #4f46e5;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111117; --text: #ececf1; --muted: #9a9aa8; --line: #26262f; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 17px/1.6 system-ui, sans-serif; background: var(--bg); color: var(--text); }
+a { color: var(--accent); }
+main { max-width: 1040px; margin: 0 auto; padding: 0 16px 64px; }
+.header, .footer { display: flex; gap: 24px; align-items: center; max-width: 1040px; margin: 0 auto; padding: 20px 16px; flex-wrap: wrap; }
+.header nav { display: flex; gap: 16px; margin-left: auto; }
+.brand { font-weight: 700; color: var(--text); text-decoration: none; }
+.footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+.hero { padding: 64px 0 32px; }
+.hero h1, .page-title { font-size: clamp(32px, 6vw, 52px); line-height: 1.1; margin: 32px 0 16px; }
+.hero img { width: 100%; border-radius: 16px; margin-top: 24px; }
+.lead { font-size: 20px; color: var(--muted); max-width: 640px; }
+.section { padding: 24px 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.card { border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.card h3 { margin-top: 0; }
+.price { font-weight: 600; }
+.muted { color: var(--muted); }
+.button { display: inline-block; background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 12px 20px; font: inherit; cursor: pointer; text-decoration: none; }
+.faq { border-bottom: 1px solid var(--line); padding: 12px 0; }
+.faq summary { cursor: pointer; font-weight: 600; }
+.form { display: grid; gap: 16px; max-width: 480px; }
+.form label { display: grid; gap: 6px; }
+.form label.checkbox { display: flex; gap: 8px; align-items: center; }
+.form input:not([type='checkbox']), .form textarea { font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: inherit; }
+.error { color: #dc2626; font-size: 14px; }
+.hp { position: absolute; left: -9999px; }
+.form-done { font-size: 20px; }
+.promo img { width: 100%; border-radius: 8px; margin-bottom: 12px; }
+.promo-discount { font-size: 28px; font-weight: 700; color: var(--accent); margin: 0 0 8px; }
+.breadcrumbs { display: flex; gap: 8px; flex-wrap: wrap; font-size: 14px; color: var(--muted); padding-top: 16px; }
+.breadcrumbs a::after { content: '/'; margin-left: 8px; color: var(--muted); }
+.footer a { color: var(--muted); }
+.legal { max-width: 760px; }

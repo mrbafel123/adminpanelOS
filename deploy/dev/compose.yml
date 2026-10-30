@@ -105,7 +105,36 @@ services:
       core:
         condition: service_healthy
 
+  # Сайт клиента на стартере (веха 4): docker compose --profile site up -d site
+  # Статика в starters/site-node/out — со своим пустым .next, иначе сборка прочитает кеш работающего SSR:
+  #   docker compose --profile site run --rm --no-deps -v /repo/starters/site-node/.next -e SITE_MODE=static site sh -c 'corepack enable && pnpm build'
+  site:
+    <<: *node
+    profiles: [site]
+    working_dir: /repo/starters/site-node
+    command: sh -c "corepack enable && pnpm install --no-frozen-lockfile && pnpm build && if [ \"$${SITE_MODE:-ssr}\" = ssr ]; then pnpm start; else sleep infinity; fi"
+    environment:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+      NEXT_TELEMETRY_DISABLED: '1'
+      CI: 'true'
+      npm_config_store_dir: /pnpm-store
+      SITE_MODE: ${SITE_MODE:-ssr}
+      CMS_URL: http://core:3000
+      NEXT_PUBLIC_CMS_URL: http://localhost:3200
+    volumes:
+      - ../..:/repo
+      - root_node_modules:/repo/node_modules
+      - core_node_modules:/repo/core/node_modules
+      - site_next:/repo/starters/site-node/.next
+      - pnpm_store:/pnpm-store
+    ports:
+      - '3220:3000'
+    depends_on:
+      core:
+        condition: service_healthy
+
 volumes:
+  site_next:
   pgdata:
   s3data:
   root_node_modules:

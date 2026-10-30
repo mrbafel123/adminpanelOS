@@ -12,10 +12,12 @@ import {
   type Endpoint,
   type Field,
   type GlobalConfig,
+  type PayloadRequest,
   type Plugin,
 } from 'payload'
 
 import { canEdit, isLoggedIn } from '../access/roles'
+import { queueRevalidate, siteTags } from '../site/revalidate'
 import { modulesEndpoints } from './endpoints'
 import { eventTasks } from './events'
 import { checkLicense, isWritable } from './license'
@@ -60,14 +62,27 @@ const hidden = (entry: ModuleEntry) => () => !entry.installed || entry.status ==
 const menuGroup = (m: ModuleManifest) => m.admin?.menu?.title ?? m.name
 const gateComponent = (moduleId: string) => ({ path: LICENSE_GATE, clientProps: { moduleId } })
 
+// Данные модуля изменились — сайт обновляет всё, что построено на этом модуле.
+const revalidateModule =
+  (entry: ModuleEntry) =>
+  async ({ req, doc }: { req: PayloadRequest; doc: unknown }) => {
+    await queueRevalidate(req, [siteTags.module(entry.manifest.id), siteTags.modules])
+    return doc
+  }
+
 const buildCollections = (entry: ModuleEntry, c: ModuleContributions): CollectionConfig[] =>
-  (c.collections ?? []).map(({ name, access = {}, admin = {}, ...rest }) => {
+  (c.collections ?? []).map(({ name, access = {}, admin = {}, hooks = {}, ...rest }) => {
     const slug = collectionSlug(entry.manifest.id, name)
     entry.collections.push(slug)
     return {
       ...rest,
       slug,
       dbName: tableName(entry.manifest.id, name),
+      hooks: {
+        ...hooks,
+        afterChange: [...(hooks.afterChange ?? []), revalidateModule(entry)],
+        afterDelete: [...(hooks.afterDelete ?? []), revalidateModule(entry)],
+      },
       access: {
         ...access,
         read: gate(entry, 'read', access.read, isLoggedIn),
@@ -107,6 +122,7 @@ const buildSettings = (entry: ModuleEntry, catalog: CatalogEntry): GlobalConfig[
         read: gate(entry, 'read', undefined, isLoggedIn),
         update: gate(entry, 'write', undefined, canEdit),
       },
+      hooks: { afterChange: [revalidateModule(entry)] },
       fields: schemaToFields(catalog.settingsSchema),
     },
   ]

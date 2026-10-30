@@ -177,6 +177,7 @@ export interface Config {
   user: User;
   jobs: {
     tasks: {
+      'site-revalidate': TaskSiteRevalidate;
       'renote-event-dispatch': TaskRenoteEventDispatch;
       'renote-event-deliver': TaskRenoteEventDeliver;
       inline: {
@@ -684,7 +685,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'renote-event-dispatch' | 'renote-event-deliver';
+        taskSlug: 'inline' | 'site-revalidate' | 'renote-event-dispatch' | 'renote-event-deliver';
         taskID: string;
         input:
           | {
@@ -715,13 +716,13 @@ export interface PayloadJob {
           | boolean
           | null;
         parent?: {
-          taskSlug?: ('inline' | 'renote-event-dispatch' | 'renote-event-deliver') | null;
+          taskSlug?: ('inline' | 'site-revalidate' | 'renote-event-dispatch' | 'renote-event-deliver') | null;
           taskID?: string | null;
         };
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'renote-event-dispatch' | 'renote-event-deliver') | null;
+  taskSlug?: ('inline' | 'site-revalidate' | 'renote-event-dispatch' | 'renote-event-deliver') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processingUntil?: string | null;
@@ -1534,6 +1535,24 @@ export interface UploadDropzoneWidget {
     excludedCollections?: 'media'[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskSite-revalidate".
+ */
+export interface TaskSiteRevalidate {
+  input: {
+    tags:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

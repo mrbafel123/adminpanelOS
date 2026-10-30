@@ -2,6 +2,7 @@
 import legalModule from '@renote/module-legal'
 import redirectsModule from '@renote/module-redirects'
 import seoModule from '@renote/module-seo'
+import { createServer, type Server } from 'node:http'
 import { getPayload, type Payload } from 'payload'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -9,6 +10,9 @@ import { catalogEntry } from './fixtures'
 import { callEndpoint, resetDatabase, runQueue } from './helpers'
 
 let payload: Payload
+// Сайт-заглушка: принимает сообщения ядра об изменениях.
+let site: Server
+const received: { secret?: string; tags: string[] }[] = []
 const call = (method: string, path: string, opts?: Parameters<typeof callEndpoint>[3]) =>
   callEndpoint(payload, method, path, opts)
 
@@ -21,6 +25,18 @@ const publish = (data: Record<string, unknown>) =>
 
 beforeAll(async () => {
   process.env.SITE_URL = 'https://site.test'
+  site = createServer((req, res) => {
+    let body = ''
+    req.on('data', (chunk) => (body += chunk))
+    req.on('end', () => {
+      received.push({ secret: req.headers['x-renote-secret'] as string, tags: JSON.parse(body).tags })
+      res.writeHead(200).end('{}')
+    })
+  })
+  await new Promise<void>((resolve) => site.listen(0, resolve))
+  const port = (site.address() as { port: number }).port
+  process.env.SITE_REVALIDATE_URL = `http://127.0.0.1:${port}/api/revalidate`
+  process.env.SITE_REVALIDATE_SECRET = 'test-secret'
   await resetDatabase()
   const { buildCellConfig } = await import('../../src/cell-config')
   const { postgresAdapter } = await import('@payloadcms/db-postgres')
@@ -46,6 +62,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await payload?.destroy()
+  site?.close()
 })
 
 describe('адреса страниц', () => {
@@ -193,5 +210,37 @@ describe('удаление модуля SEO', () => {
     expect(page.body.meta.title).toBe('Разработка')
     const robots = await call('get', '/renote/site/robots')
     expect(robots.body).not.toContain('Sitemap:')
+  })
+})
+
+describe('мгновенное обновление сайта', () => {
+  it('публикация страницы сообщает сайту теги с секретом, черновик — нет', async () => {
+    await runQueue(payload)
+    received.length = 0
+    const page = await publish({ title: 'Новости' })
+    await runQueue(payload)
+    expect(received).toContainEqual({
+      secret: 'test-secret',
+      tags: expect.arrayContaining(['page:/novosti', 'pages']),
+    })
+
+    received.length = 0
+    await payload.update({
+      collection: 'pages',
+      id: page.id,
+      data: { title: 'Новости (черновик)' } as never,
+      draft: true,
+      overrideAccess: true,
+    })
+    await runQueue(payload)
+    expect(received).toEqual([])
+  })
+
+  it('установка модуля обновляет весь сайт', async () => {
+    const { installModule } = await import('../../src/modules/lifecycle')
+    received.length = 0
+    await installModule(payload, 'seo')
+    await runQueue(payload)
+    expect(received.flatMap((r) => r.tags)).toContain('cms')
   })
 })

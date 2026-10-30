@@ -12,6 +12,7 @@
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "pregenerate:types": "pnpm catalog",
+    "postgenerate:types": "tsx scripts/site-types.ts",
     "lint": "eslint .",
     "migrate:create": "cross-env NODE_OPTIONS=--no-deprecation payload migrate:create",
     "premigrate:create": "pnpm catalog",

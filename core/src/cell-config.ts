@@ -20,6 +20,7 @@ import { migrations } from './migrations'
 import { modulePlugins } from './modules/adapter'
 import type { CatalogEntry } from './modules/types'
 import { siteEndpoints } from './site'
+import { revalidateTask } from './site/revalidate'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -68,7 +69,7 @@ export const buildCellConfig = ({ catalog, db }: { catalog: CatalogEntry[]; db?:
       }),
     plugins: modulePlugins(catalog),
     // Задачи очереди выполняет только worker: в веб-процессе autoRun не включается (ADR-012).
-    jobs: { tasks: [] },
+    jobs: { tasks: [revalidateTask] },
     storage: [
       s3Storage({
         collections: { media: true },

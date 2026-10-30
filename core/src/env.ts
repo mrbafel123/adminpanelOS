@@ -19,6 +19,9 @@ export const env = {
   siteOrigins: (process.env.SITE_ORIGINS ?? '').split(',').filter(Boolean),
   // Публичный адрес сайта: canonical, sitemap, Open Graph.
   siteUrl: (process.env.SITE_URL ?? 'http://localhost:3220').replace(/\/$/, ''),
+  // Куда ядро сообщает сайту об изменениях (мгновенное обновление кеша). Пусто — не сообщает.
+  siteRevalidateUrl: process.env.SITE_REVALIDATE_URL ?? '',
+  siteRevalidateSecret: process.env.SITE_REVALIDATE_SECRET ?? '',
   isProduction: process.env.NODE_ENV === 'production',
   // web — ядро с админкой и API, worker — процесс очереди задач.
   role: process.env.CELL_ROLE === 'worker' ? 'worker' : 'web',

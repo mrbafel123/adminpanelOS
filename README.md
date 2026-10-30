@@ -13,7 +13,8 @@
 
 - веха 1 — каркас монорепозитория, ядро на Payload 4, worker очереди, health, CI;
 - веха 2 — модульная система: SDK модулей, каталог в образе ядра, установка и удаление без потери данных, safe mode, бюджет фильтров, события через очередь, лицензии, модуль «Формы»;
-- веха 3 — модули SEO, «Редиректы», «Документы и согласия»; адреса страниц из цепочки родителей; данные страниц для сайта через точки расширения; автоматический 301 при смене адреса страницы.
+- веха 3 — модули SEO, «Редиректы», «Документы и согласия»; адреса страниц из цепочки родителей; данные страниц для сайта через точки расширения; автоматический 301 при смене адреса страницы;
+- веха 4 — стартер сайта и `@renote/site-sdk`: SSR и статика из одного кода, сайт обновляется через секунды после публикации и работает при упавшем ядре.
 
 ## Документация
 
@@ -22,6 +23,7 @@
 | Архитектурные решения, глоссарий, дорожная карта, риски | [`instructions/adr/`](instructions/adr/README.md) |
 | Правила работы в репозитории | [`CLAUDE.md`](CLAUDE.md) |
 | Как написать модуль | [`instructions/modules.md`](instructions/modules.md) |
+| Как сделать сайт клиента | [`starters/site-node/CLAUDE.md`](starters/site-node/CLAUDE.md) |
 
 ## Разработка
 
@@ -40,6 +42,15 @@ npm run dev:down   # остановить
 | Модули | http://localhost:3200/admin/modules |
 | Здоровье ячейки | http://localhost:3200/api/renote/health |
 | S3-хранилище медиа | http://localhost:8333 |
+| Сайт на стартере (`--profile site`) | http://localhost:3220 |
+
+Сайт и демо-контент:
+
+```bash
+node test-scripts/site/seed-demo.mjs                                        # модули, страницы, форма, политика
+docker compose -f deploy/dev/compose.yml --profile site up -d site          # сборка и запуск в режиме ssr
+bash test-scripts/site/resilience.sh                                        # обновление после публикации и работа без ядра
+```
 
 Команды pnpm запускаются внутри контейнера ядра:
 
@@ -73,10 +84,11 @@ core/                 ядро ячейки: API, админка, worker   ✅
 modules/*             модули: forms, seo, redirects, legal ✅
 packages/
   module-sdk/         SDK модулей                         ✅
+  site-sdk/           SDK сайта клиента                   ✅
   eslint-config/      правила линтера для модулей          ✅
   platform-contracts/ общие контракты с renoteOS
   deploy-drivers/     драйверы выкладки: token, ssh, sftp, ftps, git
-starters/site-node/   стартер уникального сайта
+starters/site-node/   стартер уникального сайта            ✅
 agent/                agent узла (reconciler)
 cli/                  CLI renote
 deploy/dev/           ячейка для разработки               ✅

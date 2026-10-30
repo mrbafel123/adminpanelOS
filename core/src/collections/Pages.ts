@@ -1,11 +1,17 @@
 import { CORE_EVENTS } from '@renote/module-sdk'
-import type { CollectionAfterChangeHook, CollectionBeforeChangeHook, CollectionConfig } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+} from 'payload'
 
 import { canEdit, publishedOrLoggedIn } from '../access/roles'
 import { pageBlocks } from '../blocks'
 import { slugField } from '../fields/slug'
 import { EVENT_DISPATCH_TASK } from '../modules/naming'
 import { queueTask } from '../modules/runtime'
+import { queueRevalidate, siteTags } from '../site/revalidate'
 
 // Главная страница сайта — страница со slug `home` без родителя.
 export const HOME_SLUG = 'home'
@@ -61,6 +67,40 @@ const onPathChange: CollectionAfterChangeHook = async ({ doc, previousDoc, opera
   return doc
 }
 
+// Сайт обновляет страницу сразу после публикации, снятия с публикации или смены адреса.
+// Черновики и автосохранение сайт не трогают.
+const revalidateSite: CollectionAfterChangeHook = async ({ doc, previousDoc, req }) => {
+  const visibleNow = doc._status === 'published'
+  const visibleBefore = previousDoc?._status === 'published'
+  if (!visibleNow && visibleBefore) {
+    // Черновик опубликованной страницы или снятие с публикации? Сайт видит только
+    // опубликованную версию: если она на месте, это просто черновик.
+    const live = await req.payload.findByID({
+      collection: 'pages',
+      id: doc.id,
+      draft: false,
+      depth: 0,
+      overrideAccess: true,
+      req,
+      disableErrors: true,
+    })
+    if (live?._status === 'published') return doc
+  }
+  if (visibleNow || visibleBefore) {
+    await queueRevalidate(req, [
+      siteTags.page(doc.path),
+      previousDoc?.path && previousDoc.path !== doc.path ? siteTags.page(previousDoc.path) : null,
+      siteTags.pages,
+    ])
+  }
+  return doc
+}
+
+const revalidateDeleted: CollectionAfterDeleteHook = async ({ doc, req }) => {
+  await queueRevalidate(req, [siteTags.page(doc.path), siteTags.pages])
+  return doc
+}
+
 export const Pages: CollectionConfig = {
   slug: 'pages',
   labels: { singular: 'Страница', plural: 'Страницы' },
@@ -74,7 +114,11 @@ export const Pages: CollectionConfig = {
   },
   // Сюда модули добавляют свои группы полей (например, SEO).
   custom: { renoteFields: true },
-  hooks: { beforeChange: [computePath], afterChange: [onPathChange] },
+  hooks: {
+    beforeChange: [computePath],
+    afterChange: [onPathChange, revalidateSite],
+    afterDelete: [revalidateDeleted],
+  },
   fields: [
     { name: 'title', type: 'text', required: true, localized: true, label: 'Заголовок' },
     {

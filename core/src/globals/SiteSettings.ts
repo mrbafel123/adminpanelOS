@@ -1,12 +1,14 @@
 import type { GlobalConfig } from 'payload'
 
 import { canEdit } from '../access/roles'
+import { queueRevalidate, siteTags } from '../site/revalidate'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: 'Настройки сайта',
   admin: { group: 'Система' },
   access: { read: () => true, update: canEdit },
+  hooks: { afterChange: [({ doc, req }) => queueRevalidate(req, [siteTags.settings]).then(() => doc)] },
   fields: [
     { name: 'siteName', type: 'text', required: true, localized: true, label: 'Название сайта' },
     { name: 'logo', type: 'upload', relationTo: 'media', label: 'Логотип' },

@@ -2,6 +2,7 @@ import { createPayloadRequest, type CollectionConfig, type Payload } from 'paylo
 
 import { checkLicense, isWritable } from './license'
 import { isActive, registry } from './registry'
+import { queueRevalidate, siteTags } from '../site/revalidate'
 import { createRuntime } from './runtime'
 
 // Состояние установки модулей ячейки (ADR-013). Меняется только операциями
@@ -88,6 +89,8 @@ export const installModule = async (payload: Payload, moduleId: string) => {
   }
   await saveState(payload, moduleId, { installed: true, installedAt: new Date().toISOString() })
   entry.installed = true
+  // Модуль меняет блоки, мета-теги и sitemap — сайт обновляется целиком.
+  await queueRevalidate(await createPayloadRequest({ payload }), [siteTags.all])
   return entry
 }
 
@@ -110,5 +113,6 @@ export const uninstallModule = async (payload: Payload, moduleId: string) => {
   }
   await saveState(payload, moduleId, { installed: false, uninstalledAt: new Date().toISOString() })
   entry.installed = false
+  await queueRevalidate(await createPayloadRequest({ payload }), [siteTags.all])
   return entry
 }

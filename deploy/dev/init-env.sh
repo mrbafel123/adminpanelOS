@@ -14,6 +14,10 @@ S3_BUCKET=media
 S3_ACCESS_KEY_ID=$S3_KEY
 S3_SECRET_ACCESS_KEY=$S3_SECRET
 SITE_ORIGINS=http://localhost:3220
+SITE_URL=http://localhost:3220
+# Ядро сообщает сайту об изменениях; сайт поднимается профилем site
+SITE_REVALIDATE_URL=http://site:3000/api/revalidate
+SITE_REVALIDATE_SECRET=$(rand 16)
 DEV_OWNER_EMAIL=owner@dev.local
 DEV_OWNER_PASSWORD=$(rand 12)
 ENV
