@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "indexSite": {
+      "type": "boolean",
+      "title": "Разрешить поисковикам индексировать сайт",
+      "description": "Выключите на тестовой копии сайта: robots.txt закроет всё, страницы получат noindex",
+      "default": true
+    },
+    "titleTemplate": {
+      "type": "string",
+      "title": "Шаблон заголовка",
+      "description": "%s — заголовок страницы, %site — название сайта",
+      "default": "%s — %site"
+    },
+    "defaultDescription": { "type": "string", "format": "textarea", "title": "Описание по умолчанию" },
+    "defaultOgImage": { "type": "string", "title": "Картинка для соцсетей по умолчанию (URL)" },
+    "robotsDisallow": {
+      "type": "string",
+      "format": "textarea",
+      "title": "Закрыть от индексации (по пути на строку)",
+      "description": "Например: /search"
+    },
+    "robotsExtra": { "type": "string", "format": "textarea", "title": "Дополнительные директивы robots.txt" },
+    "sitemapChangefreq": {
+      "type": "string",
+      "title": "Частота обновления в sitemap",
+      "enum": ["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"],
+      "default": "weekly"
+    },
+    "breadcrumbsHome": { "type": "string", "title": "Название главной в хлебных крошках", "default": "Главная" }
+  }
+}

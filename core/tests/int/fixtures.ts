@@ -19,7 +19,17 @@ const base = (id: string, extra: Partial<ModuleManifest> = {}): ModuleManifest =
   ...extra,
 })
 
-const formsRoot = path.resolve(import.meta.dirname, '../../../modules/forms')
+const modulesRoot = path.resolve(import.meta.dirname, '../../../modules')
+const formsRoot = path.join(modulesRoot, 'forms')
+
+// Запись каталога для настоящего модуля из modules/<dir>, как её собирает scripts/modules-catalog.ts.
+export const catalogEntry = (dir: string, definition: CatalogEntry['definition']): CatalogEntry => {
+  const manifest = parse(readFileSync(path.join(modulesRoot, dir, 'module.yaml'), 'utf8'))
+  const settingsSchema = manifest.settings
+    ? JSON.parse(readFileSync(path.join(modulesRoot, dir, manifest.settings), 'utf8'))
+    : null
+  return { manifest, settingsSchema, definition }
+}
 
 // Тестовый каталог: настоящий модуль forms и модули, которые ломаются нарочно.
 export const testCatalog: CatalogEntry[] = [
@@ -44,7 +54,7 @@ export const testCatalog: CatalogEntry[] = [
       setup: () => ({
         collections: [{ name: 'notes', fields: [{ name: 'text', type: 'text' }] }],
         filters: {
-          'page.meta': async (meta: { title: string }) => {
+          'page.meta': async (meta) => {
             await new Promise((resolve) => setTimeout(resolve, 200))
             return { ...meta, title: `${meta.title} — slow` }
           },

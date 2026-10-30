@@ -1,0 +1,11 @@
+id: redirects
+name: Редиректы
+version: 1.0.0
+core: '>=0.1 <1.0'
+runtime: inprocess
+admin:
+  menu: { title: Редиректы }
+events:
+  consumes: [page.path-changed.v1]
+license: { model: free }
+degradation: Сайт продолжает перенаправлять по последнему сохранённому списку правил; новые автоматические редиректы создадутся, когда worker снова доступен

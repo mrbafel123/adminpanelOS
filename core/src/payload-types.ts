@@ -62,22 +62,25 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_82552699".
+ * via the `definition` "LexicalNodes_729CACBB".
  */
-export type LexicalNodes_82552699 =
+export type LexicalNodes_729CACBB =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_82552699>
+  | SerializedParagraphNode<LexicalNodes_729CACBB>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_82552699>
+  | SerializedQuoteNode<LexicalNodes_729CACBB>
   | SerializedRelationshipNode<
       | 'pages'
       | 'folders'
       | 'users'
       | 'forms'
       | 'forms-submissions'
+      | 'legal-documents'
+      | 'legal-consents'
+      | 'redirects-rules'
       | 'cell-modules'
       | 'payload-kv'
       | 'payload-jobs'
@@ -85,11 +88,11 @@ export type LexicalNodes_82552699 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_82552699, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_82552699, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_82552699>
-  | SerializedListItemNode<LexicalNodes_82552699>
-  | SerializedHeadingNode<LexicalNodes_82552699>;
+  | SerializedAutoLinkNode<LexicalNodes_729CACBB, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_729CACBB, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_729CACBB>
+  | SerializedListItemNode<LexicalNodes_729CACBB>
+  | SerializedHeadingNode<LexicalNodes_729CACBB>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -115,6 +118,9 @@ export interface Config {
     users: User;
     forms: Form;
     'forms-submissions': FormsSubmission;
+    'legal-documents': LegalDocument;
+    'legal-consents': LegalConsent;
+    'redirects-rules': RedirectsRule;
     'cell-modules': CellModule;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
@@ -131,6 +137,9 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'forms-submissions': FormsSubmissionsSelect<false> | FormsSubmissionsSelect<true>;
+    'legal-documents': LegalDocumentsSelect<false> | LegalDocumentsSelect<true>;
+    'legal-consents': LegalConsentsSelect<false> | LegalConsentsSelect<true>;
+    'redirects-rules': RedirectsRulesSelect<false> | RedirectsRulesSelect<true>;
     'cell-modules': CellModulesSelect<false> | CellModulesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
@@ -147,12 +156,14 @@ export interface Config {
     'site-settings': SiteSetting;
     'cell-runtime': CellRuntime;
     'forms-settings': FormsSetting;
+    'seo-settings': SeoSetting;
     'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'cell-runtime': CellRuntimeSelect<false> | CellRuntimeSelect<true>;
     'forms-settings': FormsSettingsSelect<false> | FormsSettingsSelect<true>;
+    'seo-settings': SeoSettingsSelect<false> | SeoSettingsSelect<true>;
     'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'ru' | 'en';
@@ -204,6 +215,36 @@ export interface Page {
   parent?: (number | null) | Page;
   layout?: (Hero | Content | Faq | FormsForm)[] | null;
   slug?: string | null;
+  /**
+   * Считается из адресов родителей
+   */
+  path?: string | null;
+  seo?: {
+    /**
+     * Если пусто — заголовок страницы по шаблону из настроек SEO
+     */
+    title?: string | null;
+    description?: string | null;
+    ogImage?: (number | null) | Media;
+    noindex?: boolean | null;
+    nofollow?: boolean | null;
+    /**
+     * Только если отличается
+     */
+    canonical?: string | null;
+    /**
+     * Для опытных
+     */
+    jsonLd?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -367,7 +408,7 @@ export interface User {
  * via the `definition` "Content".
  */
 export interface Content {
-  body?: LexicalRichText<LexicalNodes_82552699> | null;
+  body?: LexicalRichText<LexicalNodes_729CACBB> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -445,6 +486,94 @@ export interface FormsSubmission {
   status?: ('new' | 'progress' | 'done') | null;
   ip?: string | null;
   notifiedAt?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-documents".
+ */
+export interface LegalDocument {
+  id: number;
+  title: string;
+  /**
+   * Латиницей: privacy → /legal/privacy
+   */
+  slug: string;
+  kind: 'privacy' | 'consent' | 'terms' | 'cookies' | 'other';
+  /**
+   * Без согласия с этим документом формы не принимаются
+   */
+  required?: boolean | null;
+  order?: number | null;
+  content?: LexicalRichText<LexicalNodes_729CACBB> | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-consents".
+ */
+export interface LegalConsent {
+  id: number;
+  subject: string;
+  documents?:
+    | {
+        slug?: string | null;
+        title?: string | null;
+        version?: string | null;
+        hash?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Например, forms:1
+   */
+  source?: string | null;
+  ip?: string | null;
+  givenAt: string;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects-rules".
+ */
+export interface RedirectsRule {
+  id: number;
+  from: string;
+  /**
+   * Путь сайта или полный адрес
+   */
+  to: string;
+  code: '301' | '302' | '307' | '308';
+  active?: boolean | null;
+  source?: ('manual' | 'auto' | 'import') | null;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -636,6 +765,18 @@ export interface PayloadLockedDocument {
         value: number | FormsSubmission;
       } | null)
     | ({
+        relationTo: 'legal-documents';
+        value: number | LegalDocument;
+      } | null)
+    | ({
+        relationTo: 'legal-consents';
+        value: number | LegalConsent;
+      } | null)
+    | ({
+        relationTo: 'redirects-rules';
+        value: number | RedirectsRule;
+      } | null)
+    | ({
         relationTo: 'cell-modules';
         value: number | CellModule;
       } | null);
@@ -757,6 +898,18 @@ export interface PagesSelect<T extends boolean = true> {
             };
       };
   slug?: T;
+  path?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        ogImage?: T;
+        noindex?: T;
+        nofollow?: T;
+        canonical?: T;
+        jsonLd?: T;
+      };
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -911,6 +1064,61 @@ export interface FormsSubmissionsSelect<T extends boolean = true> {
   status?: T;
   ip?: T;
   notifiedAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-documents_select".
+ */
+export interface LegalDocumentsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  kind?: T;
+  required?: T;
+  order?: T;
+  content?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-consents_select".
+ */
+export interface LegalConsentsSelect<T extends boolean = true> {
+  subject?: T;
+  documents?:
+    | T
+    | {
+        slug?: T;
+        title?: T;
+        version?: T;
+        hash?: T;
+        id?: T;
+      };
+  source?: T;
+  ip?: T;
+  givenAt?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects-rules_select".
+ */
+export interface RedirectsRulesSelect<T extends boolean = true> {
+  from?: T;
+  to?: T;
+  code?: T;
+  active?: T;
+  source?: T;
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1103,6 +1311,40 @@ export interface FormsSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-settings".
+ */
+export interface SeoSetting {
+  id: number;
+  /**
+   * Выключите на тестовой копии сайта: robots.txt закроет всё, страницы получат noindex
+   */
+  indexSite?: boolean | null;
+  /**
+   * %s — заголовок страницы, %site — название сайта
+   */
+  titleTemplate?: string | null;
+  defaultDescription?: string | null;
+  defaultOgImage?: string | null;
+  /**
+   * Например: /search
+   */
+  robotsDisallow?: string | null;
+  robotsExtra?: string | null;
+  sitemapChangefreq?: ('always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never') | null;
+  breadcrumbsHome?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats".
  */
 export interface PayloadJobsStat {
@@ -1182,6 +1424,25 @@ export interface FormsSettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-settings_select".
+ */
+export interface SeoSettingsSelect<T extends boolean = true> {
+  indexSite?: T;
+  titleTemplate?: T;
+  defaultDescription?: T;
+  defaultOgImage?: T;
+  robotsDisallow?: T;
+  robotsExtra?: T;
+  sitemapChangefreq?: T;
+  breadcrumbsHome?: T;
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs-stats_select".
  */
 export interface PayloadJobsStatsSelect<T extends boolean = true> {
@@ -1217,7 +1478,16 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'pages' | 'media' | 'folders' | 'users' | 'forms' | 'forms-submissions';
+    relatedCollection:
+      | 'pages'
+      | 'media'
+      | 'folders'
+      | 'users'
+      | 'forms'
+      | 'forms-submissions'
+      | 'legal-documents'
+      | 'legal-consents'
+      | 'redirects-rules';
     where?:
       | {
           [k: string]: unknown;
@@ -1239,7 +1509,19 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('pages' | 'media' | 'folders' | 'users' | 'forms' | 'forms-submissions')[] | null;
+    excludedCollections?:
+      | (
+          | 'pages'
+          | 'media'
+          | 'folders'
+          | 'users'
+          | 'forms'
+          | 'forms-submissions'
+          | 'legal-documents'
+          | 'legal-consents'
+          | 'redirects-rules'
+        )[]
+      | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

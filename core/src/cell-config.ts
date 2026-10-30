@@ -19,6 +19,7 @@ import { healthEndpoint } from './health'
 import { migrations } from './migrations'
 import { modulePlugins } from './modules/adapter'
 import type { CatalogEntry } from './modules/types'
+import { siteEndpoints } from './site'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -52,7 +53,7 @@ export const buildCellConfig = ({ catalog, db }: { catalog: CatalogEntry[]; db?:
     },
     collections: [Pages, Media, Folders, Users],
     globals: [SiteSettings, CellRuntime],
-    endpoints: [healthEndpoint],
+    endpoints: [healthEndpoint, ...siteEndpoints],
     editor: lexicalEditor(),
     secret: env.payloadSecret,
     typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },

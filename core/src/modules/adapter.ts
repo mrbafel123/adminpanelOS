@@ -157,6 +157,24 @@ const injectBlocks = (config: Config, entry: ModuleEntry, c: ModuleContributions
   return (config.collections ?? []).map((col) => ({ ...col, fields: visit(col.fields) }))
 }
 
+// Поля модуля попадают в коллекции ядра, помеченные custom.renoteFields (страницы),
+// одной группой с именем модуля: в базе это колонки `<id>_*` таблицы ядра.
+// В админке группа видна, только пока модуль установлен и не выключен.
+const injectFields = (collections: CollectionConfig[], entry: ModuleEntry, c: ModuleContributions) => {
+  const fields = c.fields?.pages
+  if (!fields?.length) return collections
+  const group: Field = {
+    name: entry.manifest.id,
+    type: 'group',
+    label: entry.manifest.name,
+    admin: { condition: () => entry.installed && entry.status !== 'disabled' },
+    fields,
+  }
+  return collections.map((col) =>
+    col.slug === 'pages' && col.custom?.renoteFields ? { ...col, fields: [...col.fields, group] } : col,
+  )
+}
+
 const applyContributions = (
   config: Config,
   entry: ModuleEntry,
@@ -170,7 +188,7 @@ const applyContributions = (
   // Сначала всё собирается, потом применяется разом: упавший модуль не оставит половину конфига.
   const next: Config = {
     ...config,
-    collections: [...injectBlocks(config, entry, c), ...buildCollections(entry, c)],
+    collections: [...injectFields(injectBlocks(config, entry, c), entry, c), ...buildCollections(entry, c)],
     globals: [...(config.globals ?? []), ...buildSettings(entry, catalog)],
     endpoints: [...(config.endpoints ?? []), ...buildEndpoints(entry, c)],
   }

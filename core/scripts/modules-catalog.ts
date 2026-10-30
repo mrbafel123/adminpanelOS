@@ -7,6 +7,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { CORE_EVENTS } from '@renote/module-sdk/extension-points'
 import { validateManifest, type ModuleManifest } from '@renote/module-sdk/manifest'
 import { parse } from 'yaml'
 
@@ -39,7 +40,15 @@ const entries = dirs.map((dir) => {
   return { dir, pkg: pkg.name as string, manifest, settingsSchema }
 })
 
+// Подписываться можно только на существующие события: ядра или модулей каталога.
+const knownEvents = new Set<string>([
+  ...Object.values(CORE_EVENTS),
+  ...entries.flatMap((e) => e.manifest.events?.emits ?? []),
+])
 for (const entry of entries) {
+  for (const event of entry.manifest.events?.consumes ?? []) {
+    if (!knownEvents.has(event)) failures.push(`${entry.dir}: подписка на неизвестное событие ${event}`)
+  }
   for (const dep of entry.manifest.requires ?? []) {
     if (!entries.some((e) => e.manifest.id === dep))
       failures.push(`${entry.dir}: нет зависимости ${dep} в каталоге`)

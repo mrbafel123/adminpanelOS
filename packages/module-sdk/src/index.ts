@@ -2,8 +2,11 @@
 // Модуль не импортирует Payload и ядро напрямую: только этот пакет.
 import type { Block, CollectionConfig, CollectionSlug, Field } from 'payload'
 
+import type { Filters } from './extension-points'
+
 export type { ModuleManifest } from './manifest'
 export { validateManifest } from './manifest'
+export * from './extension-points'
 
 // Коллекция модуля задаётся локальным именем. Slug и таблицу назначает ядро:
 // slug `<id>-<name>` (или `<id>`, если имя совпадает с id), таблица `mod_<id>_<name>`.
@@ -49,11 +52,6 @@ export type ModuleEndpoint = {
   handler: (req: ModuleRequest, rt: ModuleRuntime) => Promise<ModuleResponse>
 }
 
-// Фильтр — синхронная точка расширения с бюджетом 50 мс (ADR-002).
-// Получает копию значения и возвращает новое; тип значения задаёт точка расширения.
-export type FilterHandler<T = unknown> = (value: T, args: Record<string, unknown>) => T | Promise<T>
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- значение у каждой точки своё
-type AnyFilter = FilterHandler<any>
 // Подписчик события — асинхронный, со своими повторами и DLQ.
 export type EventHandler = (data: Record<string, unknown>, rt: ModuleRuntime) => Promise<void>
 // Шаги жизненного цикла (ADR-013). Должны быть идемпотентны.
@@ -63,7 +61,10 @@ export type ModuleContributions = {
   collections?: ModuleCollection[]
   blocks?: ModuleBlock[]
   endpoints?: ModuleEndpoint[]
-  filters?: Record<string, AnyFilter>
+  // Фильтры точек расширения с бюджетом 50 мс (ADR-002): получают копию значения, возвращают новое.
+  filters?: Filters
+  // Группа полей модуля в коллекциях ядра (страницы). Видна, пока модуль установлен.
+  fields?: { pages?: Field[] }
   on?: Record<string, EventHandler>
   onInstall?: LifecycleHook
   onUninstall?: LifecycleHook

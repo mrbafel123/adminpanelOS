@@ -7,6 +7,8 @@ import { createPayloadRequest, getPayload, type Payload, type User } from 'paylo
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { createLicenses, testCatalog } from './fixtures'
+import * as helpers from './helpers'
+import { resetDatabase } from './helpers'
 
 const licenseDir = mkdtempSync(path.join(os.tmpdir(), 'renote-licenses-'))
 const licenses = createLicenses(licenseDir)
@@ -14,23 +16,8 @@ const licenses = createLicenses(licenseDir)
 let payload: Payload
 let owner: User
 
-// Вызов маршрута модуля без HTTP: тот же обработчик, что и у настоящего запроса.
-const callEndpoint = async (method: string, urlPath: string, body?: unknown) => {
-  const endpoint = payload.config.endpoints.find((e) => {
-    if (e.method !== method) return false
-    const pattern = new RegExp(`^${e.path.replace(/:\w+\*/g, '.*').replace(/:\w+/g, '[^/]+')}$`)
-    return pattern.test(urlPath)
-  })
-  if (!endpoint) throw new Error(`Нет маршрута ${method} ${urlPath}`)
-  const names = [...endpoint.path.matchAll(/:(\w+)/g)].map((m) => m[1])
-  const values = urlPath.split('/').filter((_, i) => endpoint.path.split('/')[i]?.startsWith(':'))
-  const req = await createPayloadRequest({ payload })
-  req.routeParams = Object.fromEntries(names.map((n, i) => [n, values[i]]))
-  req.data = body as Record<string, unknown>
-  req.headers = new Headers()
-  const res = await endpoint.handler(req)
-  return { status: res.status, body: await res.json() }
-}
+const callEndpoint = (method: string, urlPath: string, body?: unknown) =>
+  helpers.callEndpoint(payload, method, urlPath, { body })
 
 const ownerApi = { overrideAccess: false } as const
 
@@ -40,6 +27,7 @@ beforeAll(async () => {
   process.env.RENOTE_KILLED_MODULES = 'killed'
   licenses.issue('forms', 'forms-pro', 30)
 
+  await resetDatabase()
   const { buildCellConfig } = await import('../../src/cell-config')
   const { postgresAdapter } = await import('@payloadcms/db-postgres')
   payload = await getPayload({
@@ -48,14 +36,6 @@ beforeAll(async () => {
       db: postgresAdapter({ pool: { connectionString: process.env.TEST_DATABASE_URL }, push: true }),
     }),
   })
-  // Каждый прогон — с чистыми данными: база тестов переживает прогоны.
-  for (const collection of ['forms-submissions', 'forms', 'cell-modules', 'payload-jobs'] as const) {
-    await payload.db.deleteMany({ collection, where: {} })
-  }
-  await payload.delete({ collection: 'users', where: {}, overrideAccess: true })
-  // Кеш установленных модулей прочитан при старте — до очистки, перечитываем.
-  const { refreshInstalled } = await import('../../src/modules/lifecycle')
-  await refreshInstalled(payload)
   const user = await payload.create({
     collection: 'users',
     // Роль не задаём: первый пользователь ячейки должен стать владельцем сам.
@@ -156,8 +136,7 @@ describe('события через очередь', () => {
     const forms = await payload.find({ collection: 'forms', overrideAccess: true, limit: 1 })
     await callEndpoint('post', `/m/forms/${forms.docs[0]?.id}/submit`, { phone: '+79007654321' })
     // Раздача и доставка — две задачи: два прохода очереди, как два тика worker.
-    await payload.jobs.run({ allQueues: true, overrideAccess: true })
-    await payload.jobs.run({ allQueues: true, overrideAccess: true })
+    await helpers.runQueue(payload)
     const last = await payload.find({
       collection: 'forms-submissions',
       sort: '-createdAt',
@@ -174,10 +153,14 @@ describe('бюджет фильтров', () => {
     const { applyFilter } = await import('../../src/modules/filters')
     const { registry } = await import('../../src/modules/registry')
     await installModule(payload, 'slow')
+    const { defaultMeta } = await import('../../src/site')
+    const site = { name: 'Renote', url: 'https://site.test', locale: 'ru' }
+    const page = { id: 1, path: '/', title: 'Главная', updatedAt: '', fields: {} }
+    const req = await createPayloadRequest({ payload })
     const started = performance.now()
-    const meta = await applyFilter('page.meta', { title: 'Главная' })
+    const meta = await applyFilter('page.meta', defaultMeta(page, site), { page, site }, req)
     expect(performance.now() - started).toBeLessThan(150)
-    expect(meta).toEqual({ title: 'Главная' })
+    expect(meta.title).toBe('Главная')
     expect(registry.get('slow')?.status).toBe('degraded')
   })
 })

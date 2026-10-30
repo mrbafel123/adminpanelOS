@@ -22,6 +22,9 @@ export const schemaToFields = (schema: JsonSchema): Field[] =>
       case 'object':
         return { ...common, type: 'group', fields: schemaToFields(prop) } as Field
       default:
-        return prop.format === 'email' ? { ...common, type: 'email' } : { ...common, type: 'text' }
+        if (prop.format === 'email') return { ...common, type: 'email' }
+        // format: textarea — многострочный текст (списки путей, директивы).
+        if (prop.format === 'textarea') return { ...common, type: 'textarea' }
+        return { ...common, type: 'text' }
     }
   })

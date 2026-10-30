@@ -17,6 +17,8 @@ export const env = {
     region: process.env.S3_REGION ?? 'ru-central1',
   },
   siteOrigins: (process.env.SITE_ORIGINS ?? '').split(',').filter(Boolean),
+  // Публичный адрес сайта: canonical, sitemap, Open Graph.
+  siteUrl: (process.env.SITE_URL ?? 'http://localhost:3220').replace(/\/$/, ''),
   isProduction: process.env.NODE_ENV === 'production',
   // web — ядро с админкой и API, worker — процесс очереди задач.
   role: process.env.CELL_ROLE === 'worker' ? 'worker' : 'web',

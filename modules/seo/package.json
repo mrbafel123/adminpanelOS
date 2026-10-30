@@ -1,0 +1,24 @@
+{
+  "name": "@renote/module-seo",
+  "version": "1.0.0",
+  "description": "Модуль SEO: мета-теги, Open Graph, JSON-LD, sitemap.xml, robots.txt, хлебные крошки",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@renote/module-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@renote/eslint-config": "workspace:*",
+    "eslint": "^9.39.0",
+    "payload": "4.0.0-beta.5",
+    "typescript": "6.0.3",
+    "vitest": "5.0.1"
+  }
+}

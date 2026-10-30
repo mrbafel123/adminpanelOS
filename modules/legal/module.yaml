@@ -1,0 +1,13 @@
+id: legal
+name: Документы и согласия
+version: 1.0.0
+core: '>=0.1 <1.0'
+runtime: inprocess
+permissions:
+  - events.publish:legal.*
+admin:
+  menu: { title: Документы }
+events:
+  emits: [legal.consent-given.v1]
+license: { model: free }
+degradation: Опубликованные документы остаются на сайте из кеша; если модуль недоступен, сайт не принимает согласия и не должен отправлять формы с персональными данными

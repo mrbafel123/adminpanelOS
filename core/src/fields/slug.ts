@@ -45,12 +45,13 @@ export const slugify = (value: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 
-// Slug заполняется из заголовка, если не задан вручную.
-export const slugField = (from = 'title'): Field => ({
+// Slug заполняется из заголовка, если не задан вручную. У вложенных страниц slug
+// может повторяться (/uslugi/kontakty и /o-nas/kontakty) — уникален их адрес.
+export const slugField = (from = 'title', { unique = true }: { unique?: boolean } = {}): Field => ({
   name: 'slug',
   type: 'text',
   index: true,
-  unique: true,
+  unique,
   admin: { position: 'sidebar' },
   hooks: {
     beforeValidate: [
